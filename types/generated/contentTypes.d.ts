@@ -503,6 +503,46 @@ export interface ApiClientClient extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiGoLiveGoLiveTrigger extends Struct.CollectionTypeSchema {
+  collectionName: 'go_live_triggers';
+  info: {
+    description: 'Tracks go-live webhook triggers';
+    displayName: 'Go Live Trigger';
+    pluralName: 'go-live-triggers';
+    singularName: 'go-live-trigger';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::go-live.go-live-trigger'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.String;
+    triggeredAt: Schema.Attribute.DateTime;
+    triggeredBy: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    webhookResponse: Schema.Attribute.JSON;
+  };
+}
+
 export interface ApiPortfolioCommercialPortfolioCommercial
   extends Struct.SingleTypeSchema {
   collectionName: 'portfolio_commercials';
@@ -1322,6 +1362,7 @@ declare module '@strapi/strapi' {
       'api::case-study.case-study': ApiCaseStudyCaseStudy;
       'api::category.category': ApiCategoryCategory;
       'api::client.client': ApiClientClient;
+      'api::go-live.go-live-trigger': ApiGoLiveGoLiveTrigger;
       'api::portfolio-commercial.portfolio-commercial': ApiPortfolioCommercialPortfolioCommercial;
       'api::portfolio-corporate.portfolio-corporate': ApiPortfolioCorporatePortfolioCorporate;
       'api::portfolio-documentary.portfolio-documentary': ApiPortfolioDocumentaryPortfolioDocumentary;
