@@ -1,0 +1,35 @@
+{
+    "kind": "collectionType",
+    "collectionName": "go_live_triggers",
+    "info": {
+        "singularName": "go-live-trigger",
+        "pluralName": "go-live-triggers",
+        "displayName": "Go Live Trigger",
+        "description": "Tracks go-live webhook triggers"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {
+        "content-manager": {
+            "visible": false
+        },
+        "content-type-builder": {
+            "visible": false
+        }
+    },
+    "attributes": {
+        "triggeredAt": {
+            "type": "datetime"
+        },
+        "triggeredBy": {
+            "type": "string"
+        },
+        "status": {
+            "type": "string"
+        },
+        "webhookResponse": {
+            "type": "json"
+        }
+    }
+}
