@@ -10,6 +10,14 @@ module.exports = ({ strapi }) => ({
         ctx.request.header["x-go-live-secret"] ||
         ctx.request.header["go-live-secret"];
 
+      // Logging for debugging auth/trigger flow - avoid printing secret values
+      strapi.log.info(
+        `[go-live] Trigger request received: ip=${ctx.ip || ctx.request.ip || "unknown"}, user=${ctx.state.user ? ctx.state.user.username : "none"}, secretProvided=${!!providedSecret}`
+      );
+      strapi.log.debug(
+        `[go-live] Env flags: GO_LIVE_SECRET=${!!GO_LIVE_SECRET}, GO_LIVE_WEBHOOK_URL=${!!GO_LIVE_WEBHOOK_URL}`
+      );
+
       let webhookUrl = null;
       let webhookName = null;
 
@@ -21,11 +29,14 @@ module.exports = ({ strapi }) => ({
           (webhook) =>
             webhook.isEnabled &&
             (webhook.name.toLowerCase().includes("vercel") ||
-              webhook.name.toLowerCase().includes("deploy") ||
+              webhook.name.toLowerCase().includes("production") ||
               webhook.name.toLowerCase().includes("go live"))
         );
 
         if (!vercelWebhook) {
+          strapi.log.warn(
+            `[go-live] No enabled Vercel webhook found for admin user ${ctx.state.user?.username || "unknown"}`
+          );
           ctx.status = 404;
           return {
             success: false,
@@ -35,6 +46,9 @@ module.exports = ({ strapi }) => ({
 
         webhookUrl = vercelWebhook.url;
         webhookName = vercelWebhook.name;
+        strapi.log.info(
+          `[go-live] Using stored webhook: name=${webhookName}, url=${webhookUrl}, user=${ctx.state.user?.username || "unknown"}`
+        );
       } else if (
         GO_LIVE_SECRET &&
         providedSecret &&
@@ -42,6 +56,9 @@ module.exports = ({ strapi }) => ({
       ) {
         // Allow external callers if they provide the correct secret and an env webhook URL is configured
         if (!GO_LIVE_WEBHOOK_URL) {
+          strapi.log.warn(
+            `[go-live] GO_LIVE_WEBHOOK_URL missing for secret-based trigger (request from ${ctx.ip || "unknown"})`
+          );
           ctx.status = 500;
           return {
             success: false,
@@ -52,8 +69,14 @@ module.exports = ({ strapi }) => ({
 
         webhookUrl = GO_LIVE_WEBHOOK_URL;
         webhookName = "env:GO_LIVE_WEBHOOK_URL";
+        strapi.log.info(
+          `[go-live] Using env webhook for secret-based trigger (ip=${ctx.ip || "unknown"})`
+        );
       } else {
         // No auth provided
+        strapi.log.warn(
+          `[go-live] Unauthorized trigger attempt: ip=${ctx.ip || "unknown"}, secretProvided=${!!providedSecret}`
+        );
         ctx.status = 401;
         return {
           success: false,
@@ -99,6 +122,11 @@ module.exports = ({ strapi }) => ({
       });
 
       const responseData = await response.text();
+
+      // Summary log for webhook response (length only, not content)
+      strapi.log.info(
+        `[go-live] Webhook response: url=${webhookUrl}, status=${response.status}, ok=${response.ok}, dataLength=${responseData?.length || 0}`
+      );
 
       // Log the trigger
       await strapi.entityService.create(
