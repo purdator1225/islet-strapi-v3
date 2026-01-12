@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Typography, Flex } from "@strapi/design-system";
 import { Page } from "@strapi/strapi/admin";
-import { Play, Check, Cross } from "@strapi/icons";
+import { Play, Check, Cross, ExternalLink } from "@strapi/icons";
 import { useFetchClient, useNotification } from "@strapi/strapi/admin";
 
 const GoLivePage = () => {
@@ -88,6 +88,34 @@ const GoLivePage = () => {
               fullWidth
             >
               {isLoading ? "Triggering Deployment..." : "Go Live"}
+            </Button>
+          </Box>
+
+          <Box
+            background="neutral0"
+            padding={6}
+            shadow="filterShadow"
+            hasRadius
+          >
+            <Typography variant="beta" as="h2" paddingBottom={4}>
+              Visit Staging Site
+            </Typography>
+            <Box paddingBottom={4}>
+              <Typography>
+                Preview the staging environment before deploying to production.
+              </Typography>
+            </Box>
+            <Button
+              as="a"
+              href="https://staging.isletstudio.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              startIcon={<ExternalLink />}
+              variant="secondary"
+              size="L"
+              fullWidth
+            >
+              Open Staging Site
             </Button>
           </Box>
 
